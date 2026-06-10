@@ -1,0 +1,242 @@
+const { PrismaClient } = require('@prisma/client')
+const bcrypt = require('bcryptjs')
+
+const prisma = new PrismaClient()
+
+const categories = [
+  { name: 'Fashion', slug: 'fashion', description: 'Premium African and international fashion wear', image: 'https://res.cloudinary.com/demo/image/upload/v1/prestige-mart/categories/fashion' },
+  { name: 'Shoes', slug: 'shoes', description: 'Luxury footwear for every occasion', image: 'https://res.cloudinary.com/demo/image/upload/v1/prestige-mart/categories/shoes' },
+  { name: 'Watches', slug: 'watches', description: 'Exquisite timepieces from world-renowned brands', image: 'https://res.cloudinary.com/demo/image/upload/v1/prestige-mart/categories/watches' },
+  { name: 'Electronics', slug: 'electronics', description: 'Latest gadgets and electronic devices', image: 'https://res.cloudinary.com/demo/image/upload/v1/prestige-mart/categories/electronics' },
+  { name: 'Beauty', slug: 'beauty', description: 'Premium beauty and skincare products', image: 'https://res.cloudinary.com/demo/image/upload/v1/prestige-mart/categories/beauty' },
+  { name: 'Accessories', slug: 'accessories', description: 'Complete your look with premium accessories', image: 'https://res.cloudinary.com/demo/image/upload/v1/prestige-mart/categories/accessories' },
+  { name: 'Bags', slug: 'bags', description: 'Designer bags and luggage', image: 'https://res.cloudinary.com/demo/image/upload/v1/prestige-mart/categories/bags' },
+  { name: 'Perfumes', slug: 'perfumes', description: 'Luxury fragrances for men and women', image: 'https://res.cloudinary.com/demo/image/upload/v1/prestige-mart/categories/perfumes' },
+  { name: 'Home & Living', slug: 'home-living', description: 'Premium home decor and lifestyle products', image: 'https://res.cloudinary.com/demo/image/upload/v1/prestige-mart/categories/home' },
+  { name: 'Jewelry', slug: 'jewelry', description: 'Fine jewelry and precious accessories', image: 'https://res.cloudinary.com/demo/image/upload/v1/prestige-mart/categories/jewelry' },
+]
+
+const products = [
+  { name: 'Premium Bespoke Agbada', slug: 'premium-bespoke-agbada', description: 'Handcrafted premium agbada with intricate embroidery. Made from the finest African cotton. Perfect for weddings, ceremonies, and special occasions.', price: 185000, comparePrice: 250000, sku: 'FASH-001', stock: 25, images: ['https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?w=600', 'https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?w=600'], brand: 'Prestige Mart', tags: ['agbada', 'native', 'wedding', 'premium'], categoryName: 'Fashion', isFeatured: true, costPrice: 95000, saleCount: 47 },
+  { name: 'Designer Kaftan Collection', slug: 'designer-kaftan-collection', description: 'Elegant designer kaftan with modern African prints. Breathable fabric perfect for all-day wear.', price: 95000, comparePrice: 120000, sku: 'FASH-002', stock: 40, images: ['https://images.unsplash.com/photo-1564584217132-2271feaeb3c5?w=600'], brand: 'Prestige Mart', tags: ['kaftan', 'native', 'african-print'], categoryName: 'Fashion', isFeatured: true, costPrice: 45000, saleCount: 82 },
+  { name: 'Luxury Ankara Gown', slug: 'luxury-ankara-gown', description: 'Stunning Ankara gown with modern silhouette. Features authentic African wax print fabric with contemporary tailoring.', price: 135000, comparePrice: 180000, sku: 'FASH-003', stock: 18, images: ['https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?w=600'], brand: 'African Elegance', tags: ['ankara', 'gown', 'women', 'african'], categoryName: 'Fashion', isFeatured: true, costPrice: 65000, saleCount: 123 },
+  { name: 'Premium Dashiki Shirt', slug: 'premium-dashiki-shirt', description: 'Modern take on the classic Dashiki. Crafted from premium cotton with traditional embroidery.', price: 45000, comparePrice: 55000, sku: 'FASH-004', stock: 60, images: ['https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600'], brand: 'Prestige Mart', tags: ['dashiki', 'shirt', 'men', 'casual'], categoryName: 'Fashion', isFeatured: false, costPrice: 22000, saleCount: 205 },
+  { name: 'Executive Suit Collection', slug: 'executive-suit-collection', description: 'Tailored executive suit for the modern professional. Premium wool blend with perfect fit.', price: 350000, comparePrice: 450000, sku: 'FASH-005', stock: 12, images: ['https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600'], brand: 'Prestige Mart', tags: ['suit', 'executive', 'formal', 'men'], categoryName: 'Fashion', isFeatured: true, costPrice: 180000, saleCount: 36 },
+  { name: 'African Print Blazer', slug: 'african-print-blazer', description: 'Stand out with this unique African print blazer. Perfect for business casual and events.', price: 165000, comparePrice: 220000, sku: 'FASH-006', stock: 20, images: ['https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?w=600'], brand: 'AfroChic', tags: ['blazer', 'african-print', 'formal'], categoryName: 'Fashion', isFeatured: false, costPrice: 85000, saleCount: 58 },
+  { name: 'Cashmere Cardigan', slug: 'cashmere-cardigan', description: 'Luxurious cashmere cardigan perfect for cooler evenings. Soft, warm, and elegant.', price: 125000, comparePrice: 160000, sku: 'FASH-007', stock: 30, images: ['https://images.unsplash.com/photo-1434389677669-e08b4cda3a10?w=600'], brand: 'Italian Luxe', tags: ['cardigan', 'cashmere', 'winter', 'luxury'], categoryName: 'Fashion', isFeatured: false, costPrice: 65000, saleCount: 41 },
+  { name: 'Premium Linen Shirt', slug: 'premium-linen-shirt', description: 'Breathable premium linen shirt for the tropical climate. Available in multiple colors.', price: 55000, comparePrice: 70000, sku: 'FASH-008', stock: 45, images: ['https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600'], brand: 'Prestige Mart', tags: ['linen', 'shirt', 'casual', 'summer'], categoryName: 'Fashion', isFeatured: false, costPrice: 28000, saleCount: 167 },
+  { name: 'Designer Jeans Collection', slug: 'designer-jeans-collection', description: 'Premium denim jeans with perfect stretch and fit. Imported Italian denim.', price: 85000, comparePrice: 110000, sku: 'FASH-009', stock: 50, images: ['https://images.unsplash.com/photo-1542272454315-4c01d7abdf4a?w=600'], brand: 'Denim Lab', tags: ['jeans', 'denim', 'men', 'casual'], categoryName: 'Fashion', isFeatured: false, costPrice: 42000, saleCount: 89 },
+  { name: 'Native Senator Wear', slug: 'native-senator-wear', description: 'Classic senator wear with modern embroidery. Made with premium brocade fabric.', price: 145000, comparePrice: 190000, sku: 'FASH-010', stock: 15, images: ['https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?w=600'], brand: 'Prestige Mart', tags: ['senator', 'native', 'agbada', 'premium'], categoryName: 'Fashion', isFeatured: true, costPrice: 75000, saleCount: 63 },
+  { name: 'Classic Leather Loafers', slug: 'classic-leather-loafers', description: 'Handcrafted Italian leather loafers. Premium calfskin with leather sole.', price: 185000, comparePrice: 250000, sku: 'SHOES-001', stock: 20, images: ['https://images.unsplash.com/photo-1614252369475-531192835a7a?w=600'], brand: 'Prestige Mart', tags: ['loafers', 'leather', 'formal', 'men'], categoryName: 'Shoes', isFeatured: true, costPrice: 95000, saleCount: 74 },
+  { name: 'Premium Sneakers Limited', slug: 'premium-sneakers-limited', description: 'Limited edition premium sneakers with leather and mesh upper. Comfortable for all-day wear.', price: 165000, comparePrice: 220000, sku: 'SHOES-002', stock: 30, images: ['https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600'], brand: 'SneakLab', tags: ['sneakers', 'limited', 'casual', 'men'], categoryName: 'Shoes', isFeatured: true, costPrice: 85000, saleCount: 156 },
+  { name: 'Designer Heel Pumps', slug: 'designer-heel-pumps', description: 'Elegant stiletto heel pumps for the sophisticated woman. Premium leather with cushioned insole.', price: 135000, comparePrice: 175000, sku: 'SHOES-003', stock: 22, images: ['https://images.unsplash.com/photo-1543168256-418811576931?w=600'], brand: 'Chic Steps', tags: ['heels', 'pumps', 'women', 'formal'], categoryName: 'Shoes', isFeatured: false, costPrice: 68000, saleCount: 43 },
+  { name: 'Oxford Leather Brogues', slug: 'oxford-leather-brogues', description: 'Classic Oxford brogues in premium calf leather. Traditional craftsmanship meets modern comfort.', price: 220000, comparePrice: 290000, sku: 'SHOES-004', stock: 15, images: ['https://images.unsplash.com/photo-1614252369475-531192835a7a?w=600'], brand: 'British Walk', tags: ['oxford', 'brogues', 'formal', 'leather'], categoryName: 'Shoes', isFeatured: true, costPrice: 110000, saleCount: 28 },
+  { name: 'Luxury Sandals Collection', slug: 'luxury-sandals-collection', description: 'Handmade leather sandals with African beadwork detailing. Unique and comfortable.', price: 65000, comparePrice: 85000, sku: 'SHOES-005', stock: 35, images: ['https://images.unsplash.com/photo-1603808033192-082d6919d3e1?w=600'], brand: 'Prestige Mart', tags: ['sandals', 'leather', 'summer', 'beaded'], categoryName: 'Shoes', isFeatured: false, costPrice: 32000, saleCount: 92 },
+  { name: 'Premium Chelsea Boots', slug: 'premium-chelsea-boots', description: 'Handmade Chelsea boots in polished leather. Elastic side panels for easy wear.', price: 195000, comparePrice: 260000, sku: 'SHOES-006', stock: 18, images: ['https://images.unsplash.com/photo-1638247025967-b4e38f787b76?w=600'], brand: 'Prestige Mart', tags: ['boots', 'chelsea', 'leather', 'winter'], categoryName: 'Shoes', isFeatured: true, costPrice: 98000, saleCount: 37 },
+  { name: 'Rolex Submariner Date', slug: 'rolex-submariner-date', description: 'Authentic Rolex Submariner Date. 41mm Oystersteel case with Cerachrom bezel. A true icon of luxury.', price: 8500000, comparePrice: 9500000, sku: 'WATCH-001', stock: 2, images: ['https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=600'], brand: 'Rolex', tags: ['rolex', 'submariner', 'luxury', 'swiss'], categoryName: 'Watches', isFeatured: true, costPrice: 5500000, saleCount: 5 },
+  { name: 'Omega Speedmaster Professional', slug: 'omega-speedmaster-professional', description: 'The legendary Moonwatch. Manual-winding chronograph with hesalite crystal.', price: 3200000, comparePrice: 3800000, sku: 'WATCH-002', stock: 3, images: ['https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=600'], brand: 'Omega', tags: ['omega', 'speedmaster', 'luxury', 'swiss'], categoryName: 'Watches', isFeatured: true, costPrice: 2100000, saleCount: 8 },
+  { name: 'Cartier Tank Française', slug: 'cartier-tank-francaise', description: 'Elegant Cartier Tank Française in 18k gold. Iconic rectangular design with Swiss movement.', price: 5200000, comparePrice: 6000000, sku: 'WATCH-003', stock: 1, images: ['https://images.unsplash.com/photo-1585123334904-845d60e97b29?w=600'], brand: 'Cartier', tags: ['cartier', 'tank', 'gold', 'luxury'], categoryName: 'Watches', isFeatured: false, costPrice: 3500000, saleCount: 3 },
+  { name: 'Tag Heuer Formula 1', slug: 'tag-heuer-formula-1', description: 'Sporty Tag Heuer Formula 1 chronograph. Quartz movement with tachymeter bezel.', price: 850000, comparePrice: 1100000, sku: 'WATCH-004', stock: 8, images: ['https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=600'], brand: 'Tag Heuer', tags: ['tag-heuer', 'formula-1', 'sport', 'chronograph'], categoryName: 'Watches', isFeatured: false, costPrice: 520000, saleCount: 22 },
+  { name: 'Audemars Piguet Royal Oak', slug: 'audemars-piguet-royal-oak', description: 'Exquisite Royal Oak in stainless steel. The iconic octagonal bezel and integrated bracelet.', price: 12500000, comparePrice: 14500000, sku: 'WATCH-005', stock: 1, images: ['https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=600'], brand: 'Audemars Piguet', tags: ['audemars-piguet', 'royal-oak', 'luxury', 'swiss'], categoryName: 'Watches', isFeatured: true, costPrice: 8500000, saleCount: 2 },
+  { name: 'iPhone 16 Pro Max', slug: 'iphone-16-pro-max', description: 'Latest iPhone with A18 Pro chip, 48MP camera system, and titanium design. 256GB storage.', price: 1850000, comparePrice: 2100000, sku: 'ELEC-001', stock: 15, images: ['https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=600'], brand: 'Apple', tags: ['iphone', 'apple', 'smartphone', 'premium'], categoryName: 'Electronics', isFeatured: true, costPrice: 1200000, saleCount: 89 },
+  { name: 'MacBook Pro 16" M4', slug: 'macbook-pro-16-m4', description: 'Powerful MacBook Pro with M4 chip, 36GB RAM, 1TB SSD. Liquid Retina XDR display.', price: 4500000, comparePrice: 5200000, sku: 'ELEC-002', stock: 8, images: ['https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600'], brand: 'Apple', tags: ['macbook', 'apple', 'laptop', 'pro'], categoryName: 'Electronics', isFeatured: true, costPrice: 3200000, saleCount: 34 },
+  { name: 'Samsung Galaxy S25 Ultra', slug: 'samsung-galaxy-s25-ultra', description: 'Samsung flagship with S Pen, 200MP camera, and stunning AMOLED display. 512GB.', price: 1650000, comparePrice: 1900000, sku: 'ELEC-003', stock: 20, images: ['https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=600'], brand: 'Samsung', tags: ['samsung', 'galaxy', 'smartphone', 'android'], categoryName: 'Electronics', isFeatured: false, costPrice: 1050000, saleCount: 56 },
+  { name: 'Sony WH-1000XM6 Headphones', slug: 'sony-wh-1000xm6-headphones', description: 'Industry-leading noise cancellation with premium sound quality. 40-hour battery life.', price: 450000, comparePrice: 550000, sku: 'ELEC-004', stock: 25, images: ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600'], brand: 'Sony', tags: ['sony', 'headphones', 'noise-cancelling', 'audio'], categoryName: 'Electronics', isFeatured: true, costPrice: 280000, saleCount: 112 },
+  { name: 'iPad Pro 13" M4', slug: 'ipad-pro-13-m4', description: 'Ultra-portable iPad Pro with M4 chip, OLED display, and Apple Pencil Pro support. 256GB.', price: 2200000, comparePrice: 2600000, sku: 'ELEC-005', stock: 12, images: ['https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600'], brand: 'Apple', tags: ['ipad', 'apple', 'tablet', 'pro'], categoryName: 'Electronics', isFeatured: false, costPrice: 1500000, saleCount: 28 },
+  { name: 'Dyson Airwrap Complete', slug: 'dyson-airwrap-complete', description: 'Multi-styler complete set for hair. Uses Coanda air styling to curl, wave, smooth and dry.', price: 650000, comparePrice: 780000, sku: 'BEAU-001', stock: 14, images: ['https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600'], brand: 'Dyson', tags: ['dyson', 'hair', 'styler', 'beauty'], categoryName: 'Beauty', isFeatured: true, costPrice: 400000, saleCount: 67 },
+  { name: 'Premium Skincare Set', slug: 'premium-skincare-set', description: 'Complete skincare routine with cleanser, serum, moisturizer, and SPF. Suitable for all skin types.', price: 185000, comparePrice: 250000, sku: 'BEAU-002', stock: 30, images: ['https://images.unsplash.com/photo-1570194065650-d99fb4b8ccb0?w=600'], brand: 'Glow Lab', tags: ['skincare', 'beauty', 'premium', 'set'], categoryName: 'Beauty', isFeatured: false, costPrice: 95000, saleCount: 134 },
+  { name: 'Nigerian Shea Butter Collection', slug: 'nigerian-shea-butter-collection', description: 'Pure, unrefined Nigerian shea butter. Handcrafted by local women cooperatives. Organic and fair trade.', price: 25000, comparePrice: 35000, sku: 'BEAU-003', stock: 100, images: ['https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=600'], brand: 'Prestige Mart', tags: ['shea-butter', 'natural', 'organic', 'nigeria'], categoryName: 'Beauty', isFeatured: false, costPrice: 12000, saleCount: 345 },
+  { name: 'Luxury Makeup Set', slug: 'luxury-makeup-set', description: 'Complete makeup collection with foundation, eyeshadow palette, lipsticks, and brushes.', price: 280000, comparePrice: 350000, sku: 'BEAU-004', stock: 18, images: ['https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600'], brand: 'Glamour House', tags: ['makeup', 'cosmetics', 'luxury', 'set'], categoryName: 'Beauty', isFeatured: true, costPrice: 150000, saleCount: 42 },
+  { name: 'Hair Growth Serum Premium', slug: 'hair-growth-serum-premium', description: 'Advanced hair growth serum with biotin, castor oil, and essential vitamins. Promotes healthy hair growth.', price: 45000, comparePrice: 58000, sku: 'BEAU-005', stock: 50, images: ['https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=600'], brand: 'Naturals', tags: ['hair', 'serum', 'growth', 'natural'], categoryName: 'Beauty', isFeatured: false, costPrice: 22000, saleCount: 189 },
+  { name: 'Designer Sunglasses', slug: 'designer-sunglasses', description: 'Premium UV-protected designer sunglasses. Gold-tone frame with polarized lenses.', price: 185000, comparePrice: 250000, sku: 'ACC-001', stock: 25, images: ['https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=600'], brand: 'Italian Eyes', tags: ['sunglasses', 'designer', 'uv-protection', 'gold'], categoryName: 'Accessories', isFeatured: true, costPrice: 92000, saleCount: 78 },
+  { name: 'Premium Leather Belt', slug: 'premium-leather-belt', description: 'Italian full-grain leather belt with brushed gold buckle. Reversible design for versatility.', price: 85000, comparePrice: 110000, sku: 'ACC-002', stock: 40, images: ['https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600'], brand: 'Prestige Mart', tags: ['belt', 'leather', 'italian', 'accessory'], categoryName: 'Accessories', isFeatured: false, costPrice: 42000, saleCount: 145 },
+  { name: 'Silk Tie Collection', slug: 'silk-tie-collection', description: 'Handmade Italian silk ties. Set of 3 in classic patterns. Perfect for the executive gentleman.', price: 95000, comparePrice: 130000, sku: 'ACC-003', stock: 35, images: ['https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600'], brand: 'Italian Silk', tags: ['tie', 'silk', 'formal', 'set'], categoryName: 'Accessories', isFeatured: false, costPrice: 48000, saleCount: 56 },
+  { name: 'Premium Face Cap Collection', slug: 'premium-face-cap-collection', description: 'Stylish premium caps with African-inspired embroidery. Adjustable fit, premium cotton.', price: 25000, comparePrice: 35000, sku: 'ACC-004', stock: 60, images: ['https://images.unsplash.com/photo-1521369909029-2afed882baee?w=600'], brand: 'Street Style NG', tags: ['cap', 'hat', 'accessory', 'casual'], categoryName: 'Accessories', isFeatured: false, costPrice: 12000, saleCount: 234 },
+  { name: 'Gold Cufflinks Set', slug: 'gold-cufflinks-set', description: '18k gold-plated cufflinks set with mother of pearl inlay. Comes in premium gift box.', price: 125000, comparePrice: 160000, sku: 'ACC-005', stock: 15, images: ['https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600'], brand: 'Gold Standard', tags: ['cufflinks', 'gold', 'formal', 'gift'], categoryName: 'Accessories', isFeatured: true, costPrice: 65000, saleCount: 32 },
+  { name: 'Designer Leather Backpack', slug: 'designer-leather-backpack', description: 'Premium full-grain leather backpack with padded laptop compartment. Perfect for the modern professional.', price: 280000, comparePrice: 350000, sku: 'BAGS-001', stock: 15, images: ['https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600'], brand: 'Prestige Mart', tags: ['backpack', 'leather', 'laptop', 'designer'], categoryName: 'Bags', isFeatured: true, costPrice: 150000, saleCount: 45 },
+  { name: 'Louis Vuitton Neverfull GM', slug: 'louis-vuitton-neverfull-gm', description: 'Authentic Louis Vuitton Neverfull GM in Damier Ebene canvas. Spacious and iconic.', price: 950000, comparePrice: 1200000, sku: 'BAGS-002', stock: 3, images: ['https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=600'], brand: 'Louis Vuitton', tags: ['louis-vuitton', 'neverfull', 'designer', 'luxury'], categoryName: 'Bags', isFeatured: true, costPrice: 650000, saleCount: 12 },
+  { name: 'Gucci GG Marmont Bag', slug: 'gucci-gg-marmont-bag', description: 'Authentic Gucci GG Marmont matelassé shoulder bag in chevron leather. Gold-toned hardware.', price: 1200000, comparePrice: 1500000, sku: 'BAGS-003', stock: 2, images: ['https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=600'], brand: 'Gucci', tags: ['gucci', 'marmont', 'designer', 'luxury'], categoryName: 'Bags', isFeatured: true, costPrice: 800000, saleCount: 8 },
+  { name: 'Premium Travel Duffel', slug: 'premium-travel-duffel', description: 'Water-resistant premium canvas duffel bag with leather trim. Perfect weekend travel companion.', price: 195000, comparePrice: 250000, sku: 'BAGS-004', stock: 20, images: ['https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600'], brand: 'Prestige Mart', tags: ['duffel', 'travel', 'leather', 'canvas'], categoryName: 'Bags', isFeatured: false, costPrice: 98000, saleCount: 67 },
+  { name: 'Chanel Classic Flap Bag', slug: 'chanel-classic-flap-bag', description: 'Iconic Chanel Classic Flap Bag in caviar leather with gold hardware. Timeless elegance.', price: 2800000, comparePrice: 3500000, sku: 'BAGS-005', stock: 1, images: ['https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=600'], brand: 'Chanel', tags: ['chanel', 'classic-flap', 'designer', 'luxury'], categoryName: 'Bags', isFeatured: true, costPrice: 1900000, saleCount: 4 },
+  { name: 'Creed Aventus EDP', slug: 'creed-aventus-edp', description: 'The iconic Creed Aventus. Notes of pineapple, blackcurrant, and oakmoss. A fragrance for the confident.', price: 350000, comparePrice: 420000, sku: 'PERF-001', stock: 12, images: ['https://images.unsplash.com/photo-1541643600914-78b084683601?w=600'], brand: 'Creed', tags: ['creed', 'aventus', 'niche', 'masculine'], categoryName: 'Perfumes', isFeatured: true, costPrice: 220000, saleCount: 56 },
+  { name: 'Chanel No. 5 EDP', slug: 'chanel-no-5-edp', description: 'The world\'s most famous fragrance. Timeless floral aldehyde composition. A true classic.', price: 280000, comparePrice: 350000, sku: 'PERF-002', stock: 15, images: ['https://images.unsplash.com/photo-1541643600914-78b084683601?w=600'], brand: 'Chanel', tags: ['chanel', 'no-5', 'feminine', 'classic'], categoryName: 'Perfumes', isFeatured: false, costPrice: 170000, saleCount: 43 },
+  { name: 'Tom Ford Oud Wood', slug: 'tom-ford-oud-wood', description: 'Exotic and sensual Oud Wood by Tom Ford. A luxurious blend of rare oud and warm spices.', price: 420000, comparePrice: 520000, sku: 'PERF-003', stock: 10, images: ['https://images.unsplash.com/photo-1541643600914-78b084683601?w=600'], brand: 'Tom Ford', tags: ['tom-ford', 'oud', 'niche', 'unisex'], categoryName: 'Perfumes', isFeatured: true, costPrice: 260000, saleCount: 38 },
+  { name: 'Nigerian Premium Oud Collection', slug: 'nigerian-premium-oud-collection', description: 'Premium oud fragrance crafted in Nigeria. Long-lasting, rich, and authentic Arabian-inspired scent.', price: 85000, comparePrice: 110000, sku: 'PERF-004', stock: 25, images: ['https://images.unsplash.com/photo-1541643600914-78b084683601?w=600'], brand: 'Prestige Mart', tags: ['oud', 'nigerian', 'premium', 'traditional'], categoryName: 'Perfumes', isFeatured: false, costPrice: 42000, saleCount: 178 },
+  { name: 'Jo Malone Peony & Blush Suede', slug: 'jo-malone-peony-blush-suede', description: 'Elegant floral fragrance with notes of peony, red apple, and blush suede. Layering essential.', price: 185000, comparePrice: 240000, sku: 'PERF-005', stock: 18, images: ['https://images.unsplash.com/photo-1541643600914-78b084683601?w=600'], brand: 'Jo Malone', tags: ['jo-malone', 'floral', 'feminine', 'niche'], categoryName: 'Perfumes', isFeatured: false, costPrice: 110000, saleCount: 64 },
+  { name: 'Egyptian Cotton Bed Set', slug: 'egyptian-cotton-bed-set', description: 'Premium 1000 thread count Egyptian cotton bed sheet set. Includes fitted sheet, flat sheet, and 4 pillowcases.', price: 285000, comparePrice: 350000, sku: 'HOME-001', stock: 20, images: ['https://images.unsplash.com/photo-1616627547584-bf28cee262db?w=600'], brand: 'Prestige Mart', tags: ['bedding', 'cotton', 'premium', 'home'], categoryName: 'Home & Living', isFeatured: false, costPrice: 150000, saleCount: 34 },
+  { name: 'Luxury Scented Candle Set', slug: 'luxury-scented-candle-set', description: 'Set of 3 premium soy wax candles. Scents: Vanilla & Amber, Lavender & Sage, Fig & Cassis.', price: 65000, comparePrice: 85000, sku: 'HOME-002', stock: 40, images: ['https://images.unsplash.com/photo-1603006905003-be475563bc59?w=600'], brand: 'Scent House', tags: ['candles', 'home', 'scented', 'luxury'], categoryName: 'Home & Living', isFeatured: false, costPrice: 32000, saleCount: 89 },
+  { name: 'African Art Wall Decor', slug: 'african-art-wall-decor', description: 'Handcrafted African art piece. Made by local artisans with recycled materials. Unique statement piece.', price: 185000, comparePrice: 250000, sku: 'HOME-003', stock: 10, images: ['https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=600'], brand: 'Artisans NG', tags: ['art', 'african', 'decor', 'handmade'], categoryName: 'Home & Living', isFeatured: true, costPrice: 85000, saleCount: 23 },
+  { name: 'Premium Dinner Set', slug: 'premium-dinner-set', description: 'Fine bone china dinner set for 8 people. Includes dinner plates, salad plates, bowls, and mugs.', price: 350000, comparePrice: 450000, sku: 'HOME-004', stock: 8, images: ['https://images.unsplash.com/photo-1514326640560-7d063ef2aed5?w=600'], brand: 'Royal Table', tags: ['dinner-set', 'bone-china', 'premium', 'home'], categoryName: 'Home & Living', isFeatured: false, costPrice: 180000, saleCount: 15 },
+  { name: 'Gold Diamond Necklace', slug: 'gold-diamond-necklace', description: '18k gold diamond-cut necklace with genuine VS1 diamonds. Total diamond weight: 1.5 carats.', price: 2500000, comparePrice: 3200000, sku: 'JEWL-001', stock: 2, images: ['https://images.unsplash.com/photo-1602751584552-8ba73a1d1d4a?w=600'], brand: 'Prestige Gems', tags: ['necklace', 'gold', 'diamond', 'luxury'], categoryName: 'Jewelry', isFeatured: true, costPrice: 1600000, saleCount: 6 },
+  { name: 'Pearl Drop Earrings', slug: 'pearl-drop-earrings', description: 'Authentic South Sea pearl drop earrings set in 18k white gold with diamond accents.', price: 850000, comparePrice: 1100000, sku: 'JEWL-002', stock: 5, images: ['https://images.unsplash.com/photo-1635767798638-3e25273a8236?w=600'], brand: 'Pearl House', tags: ['earrings', 'pearl', 'gold', 'diamond'], categoryName: 'Jewelry', isFeatured: true, costPrice: 520000, saleCount: 14 },
+  { name: 'Gold Bangle Set', slug: 'gold-bangle-set', description: 'Set of 3 22k gold bangles with traditional African engraving. Stackable design.', price: 650000, comparePrice: 850000, sku: 'JEWL-003', stock: 8, images: ['https://images.unsplash.com/photo-1602751584552-8ba73a1d1d4a?w=600'], brand: 'Gold Heritage', tags: ['bangles', 'gold', 'traditional', 'african'], categoryName: 'Jewelry', isFeatured: false, costPrice: 400000, saleCount: 25 },
+  { name: 'Diamond Engagement Ring', slug: 'diamond-engagement-ring', description: 'Stunning 2 carat round brilliant diamond engagement ring. VS1 clarity, E color. Platinum setting.', price: 5800000, comparePrice: 7200000, sku: 'JEWL-004', stock: 1, images: ['https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600'], brand: 'Prestige Gems', tags: ['ring', 'diamond', 'engagement', 'platinum'], categoryName: 'Jewelry', isFeatured: true, costPrice: 3800000, saleCount: 3 },
+  { name: 'Silver Chain Bracelet', slug: 'silver-chain-bracelet', description: 'Italian sterling silver chain bracelet with lobster clasp. Classic and timeless design.', price: 125000, comparePrice: 160000, sku: 'JEWL-005', stock: 20, images: ['https://images.unsplash.com/photo-1611591437281-460bfbe29b0e?w=600'], brand: 'Silver Luxe', tags: ['bracelet', 'silver', 'italian', 'classic'], categoryName: 'Jewelry', isFeatured: false, costPrice: 65000, saleCount: 89 },
+]
+
+const customers = [
+  { firstName: 'Chidi', lastName: 'Okonkwo', email: 'chidi.okonkwo@email.com', phone: '+2348012345670' },
+  { firstName: 'Ngozi', lastName: 'Eze', email: 'ngozi.eze@email.com', phone: '+2348012345671' },
+  { firstName: 'Tunde', lastName: 'Babatunde', email: 'tunde.babatunde@email.com', phone: '+2348012345672' },
+  { firstName: 'Folake', lastName: 'Adebayo', email: 'folake.adebayo@email.com', phone: '+2348012345673' },
+  { firstName: 'Emeka', lastName: 'Okafor', email: 'emeka.okafor@email.com', phone: '+2348012345674' },
+  { firstName: 'Amina', lastName: 'Suleiman', email: 'amina.suleiman@email.com', phone: '+2348012345675' },
+  { firstName: 'Kunle', lastName: 'Adebisi', email: 'kunle.adebisi@email.com', phone: '+2348012345676' },
+  { firstName: 'Chioma', lastName: 'Nwosu', email: 'chioma.nwosu@email.com', phone: '+2348012345677' },
+  { firstName: 'Yusuf', lastName: 'Abdullahi', email: 'yusuf.abdullahi@email.com', phone: '+2348012345678' },
+  { firstName: 'Simi', lastName: 'Ogundipe', email: 'simi.ogundipe@email.com', phone: '+2348012345679' },
+  { firstName: 'Ebere', lastName: 'Nwachukwu', email: 'ebere.nwachukwu@email.com', phone: '+2348012345680' },
+  { firstName: 'Damilola', lastName: 'Ogunleye', email: 'damilola.ogunleye@email.com', phone: '+2348012345681' },
+  { firstName: 'Musa', lastName: 'Ibrahim', email: 'musa.ibrahim@email.com', phone: '+2348012345682' },
+  { firstName: 'Zainab', lastName: 'Bello', email: 'zainab.bello@email.com', phone: '+2348012345683' },
+  { firstName: 'Ifeanyi', lastName: 'Okeke', email: 'ifeanyi.okeke@email.com', phone: '+2348012345684' },
+  { firstName: 'Temidayo', lastName: 'Akinwale', email: 'temidayo.akinwale@email.com', phone: '+2348012345685' },
+  { firstName: 'Nkechi', lastName: 'Ugwu', email: 'nkechi.ugwu@email.com', phone: '+2348012345686' },
+  { firstName: 'Segun', lastName: 'Olawale', email: 'segun.olawale@email.com', phone: '+2348012345687' },
+  { firstName: 'Halima', lastName: 'Abubakar', email: 'halima.abubakar@email.com', phone: '+2348012345688' },
+  { firstName: 'Obinna', lastName: 'Ezeh', email: 'obinna.ezeh@email.com', phone: '+2348012345689' },
+]
+
+const reviewTexts = [
+  'Absolutely stunning product! The quality exceeded my expectations.',
+  'Fast delivery and beautiful packaging. Will definitely buy again.',
+  'Great value for money. The craftsmanship is remarkable.',
+  'Perfect for special occasions. Received so many compliments!',
+  'Premium quality as expected from Prestige Mart. Highly recommended.',
+  'The product matches the description perfectly. Very satisfied.',
+  'Excellent customer service and top-notch quality.',
+  'A bit pricey but worth every naira. Outstanding quality.',
+  'My new favorite store for luxury items. Never disappoints.',
+  'The attention to detail is incredible. Five stars!',
+  'Makes a perfect gift. The recipient loved it!',
+  'Substantial quality that lasts. Very impressed.',
+  'Elegant and sophisticated. Exceeds expectations.',
+  'Shipping was fast and the item was well-packaged.',
+  'Beautiful design and comfortable to wear.',
+]
+
+const reviewTitles = [
+  'Exceeds Expectations', 'Premium Quality', 'Highly Recommend',
+  'Absolutely Love It', 'Worth Every Naira', 'Stunning Product',
+  'Perfect Purchase', 'Outstanding Quality', 'Beautiful Design',
+  'Five Star Experience', 'Excellent Choice', 'Simply Amazing',
+]
+
+async function main() {
+  console.log('🌍 Starting Prestige Mart seed...\n')
+
+  const hashedPassword = await bcrypt.hash('Customer@123', 12)
+  const adminPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'Admin@123456', 12)
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@prestigemart.ng'
+
+  const admin = await prisma.user.upsert({
+    where: { email: adminEmail },
+    update: {},
+    create: { email: adminEmail, password: adminPassword, firstName: 'Admin', lastName: 'Prestige', role: 'ADMIN', phone: '+2348000000000', isVerified: true }
+  })
+  console.log('✓ Created admin:', admin.email)
+
+  for (const c of customers) {
+    await prisma.user.upsert({
+      where: { email: c.email },
+      update: {},
+      create: { ...c, password: hashedPassword, role: 'CUSTOMER', isVerified: true }
+    })
+  }
+  console.log('✓ Created 20 customer accounts (password: Customer@123)')
+
+  for (const cat of categories) {
+    await prisma.category.upsert({
+      where: { slug: cat.slug },
+      update: {},
+      create: cat
+    })
+  }
+  console.log('✓ Created 10 categories')
+
+  const dbCategories = await prisma.category.findMany()
+
+  let productCount = 0
+  for (const prod of products) {
+    const category = dbCategories.find(c => c.name === prod.categoryName)
+    if (!category) continue
+
+    const { categoryName, isFeatured, costPrice, saleCount, ...productData } = prod
+
+    await prisma.product.upsert({
+      where: { sku: prod.sku },
+      update: {},
+      create: { ...productData, categoryId: category.id, isFeatured: isFeatured || false, costPrice: costPrice || 0, saleCount: saleCount || 0 }
+    })
+    productCount++
+  }
+  console.log(`✓ Created ${productCount} products`)
+
+  const reviewUsers = await prisma.user.findMany({ where: { role: 'CUSTOMER', isVerified: true }, take: 20 })
+  const dbProducts = await prisma.product.findMany()
+
+  let reviewCount = 0
+  for (const product of dbProducts) {
+    const numReviews = Math.floor(Math.random() * 5) + 1
+    const shuffledUsers = [...reviewUsers].sort(() => Math.random() - 0.5).slice(0, numReviews)
+
+    for (const user of shuffledUsers) {
+      const rating = Math.floor(Math.random() * 2) + 4
+      const title = reviewTitles[Math.floor(Math.random() * reviewTitles.length)]
+      const comment = reviewTexts[Math.floor(Math.random() * reviewTexts.length)]
+
+      await prisma.review.upsert({
+        where: { productId_userId: { productId: product.id, userId: user.id } },
+        update: {},
+        create: { productId: product.id, userId: user.id, rating, title, comment, isVerified: true }
+      })
+      reviewCount++
+    }
+  }
+  console.log(`✓ Created ${reviewCount} product reviews`)
+
+  const coupons = [
+    { code: 'WELCOME10', type: 'percentage', value: 10, minOrder: 50000, maxUses: 100, isActive: true },
+    { code: 'PREMIUM50', type: 'flat', value: 50000, minOrder: 200000, maxUses: 50, isActive: true },
+    { code: 'FREESHIP', type: 'flat', value: 2500, minOrder: 50000, maxUses: 200, isActive: true },
+    { code: 'LUXURY20', type: 'percentage', value: 20, minOrder: 150000, maxUses: 30, isActive: true },
+    { code: 'VIP100', type: 'flat', value: 100000, minOrder: 500000, maxUses: 10, isActive: true },
+  ]
+
+  for (const coupon of coupons) {
+    await prisma.coupon.upsert({
+      where: { code: coupon.code },
+      update: {},
+      create: coupon
+    })
+  }
+  console.log('✓ Created 5 coupon codes')
+
+  const notifications = reviewUsers.slice(0, 5)
+  for (const user of notifications) {
+    await prisma.notification.create({
+      data: {
+        userId: user.id,
+        title: 'Welcome to Prestige Mart!',
+        message: 'Thank you for joining the Prestige Mart community. Enjoy 10% off your first order with code WELCOME10.',
+        type: 'welcome',
+        link: '/shop'
+      }
+    })
+  }
+  console.log('✓ Created welcome notifications')
+
+  console.log('\n✅ Seed completed successfully!')
+  console.log('📧 Admin login:', adminEmail)
+  console.log('🔑 Admin password:', process.env.ADMIN_PASSWORD || 'Admin@123456')
+  console.log('📧 Customer password: Customer@123')
+}
+
+main()
+  .catch((e) => {
+    console.error('❌ Seed failed:', e.message)
+    process.exit(1)
+  })
+  .finally(async () => {
+    await prisma.$disconnect()
+  })

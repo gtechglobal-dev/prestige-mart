@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+  --color-pm-primary: #111827;
+  --color-pm-secondary: #D4AF37;
+  --color-pm-secondary-light: #E2C07A;
+  --color-pm-secondary-dark: #B8893A;
+  --color-pm-accent: #FFFFFF;
+  --color-pm-success: #10B981;
+  --color-pm-dark: #0F172A;
+  --color-pm-light: #F8FAFC;
+  --color-pm-gray: #64748B;
+  --color-pm-border: #E2E8F0;
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+body {
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-dark {
+  background: rgba(17, 24, 39, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+
+.gradient-gold {
+  background: linear-gradient(135deg, #D4AF37 0%, #E2C07A 50%, #B8893A 100%);
+}
+
+.gradient-dark {
+  background: linear-gradient(135deg, #111827 0%, #1F2937 50%, #0F172A 100%);
+}
+
+.hero-gradient {
+  background: linear-gradient(135deg, #0F172A 0%, #111827 40%, #1E3A5F 100%);
+}
+
+.card-hover {
+  transition: all 0.3s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #D4AF37 0%, #E2C07A 50%, #B8893A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
