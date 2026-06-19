@@ -39,7 +39,7 @@ export default function Cart() {
     setCouponError('')
     try {
       const res = await couponAPI.validate({ code: couponCode, subtotal })
-      if (res.data.valid) { setCoupon(res.data.coupon) } else { setCouponError('Invalid coupon') }
+      if (res.valid) { setCoupon(res.coupon) } else { setCouponError('Invalid coupon') }
     } catch (err) { setCouponError(err.response?.data?.message || 'Invalid coupon') }
     setCouponLoading(false)
   }

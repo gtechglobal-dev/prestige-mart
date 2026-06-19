@@ -14,7 +14,7 @@ API.interceptors.request.use((config) => {
 })
 
 API.interceptors.response.use(
-  (response) => response,
+  (response) => response.data,
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('pm_token')

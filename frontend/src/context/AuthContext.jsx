@@ -20,7 +20,7 @@ export function AuthProvider({ children }) {
     const token = localStorage.getItem('pm_token')
     if (token) {
       authAPI.getMe()
-        .then(res => { setUser(res.data); localStorage.setItem('pm_user', JSON.stringify(res.data)) })
+        .then(data => { setUser(data); localStorage.setItem('pm_user', JSON.stringify(data)) })
         .catch(() => { localStorage.removeItem('pm_token'); localStorage.removeItem('pm_user'); setUser(null) })
         .finally(() => setLoading(false))
     } else {
@@ -30,18 +30,18 @@ export function AuthProvider({ children }) {
 
   const login = async (data) => {
     const res = await authAPI.login(data)
-    localStorage.setItem('pm_token', res.data.token)
-    localStorage.setItem('pm_user', JSON.stringify(res.data.user))
-    setUser(res.data.user)
-    return res.data
+    localStorage.setItem('pm_token', res.token)
+    localStorage.setItem('pm_user', JSON.stringify(res.user))
+    setUser(res.user)
+    return res
   }
 
   const register = async (data) => {
     const res = await authAPI.register(data)
-    localStorage.setItem('pm_token', res.data.token)
-    localStorage.setItem('pm_user', JSON.stringify(res.data.user))
-    setUser(res.data.user)
-    return res.data
+    localStorage.setItem('pm_token', res.token)
+    localStorage.setItem('pm_user', JSON.stringify(res.user))
+    setUser(res.user)
+    return res
   }
 
   const logout = () => {

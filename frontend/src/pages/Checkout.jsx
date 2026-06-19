@@ -30,13 +30,13 @@ export default function Checkout() {
   const createOrderMutation = useMutation({
     mutationFn: (data) => orderAPI.create(data),
     onSuccess: async (res) => {
-      const order = res.data.order
+      const order = res.order
       if (paymentMethod === 'paystack') {
         const payRes = await paymentAPI.initializePaystack({ orderId: order.id })
-        window.location.href = payRes.data.authorization_url
+        window.location.href = payRes.authorization_url
       } else {
         const fwRes = await paymentAPI.initializeFlutterwave({ orderId: order.id })
-        window.location.href = fwRes.data.authorization_url
+        window.location.href = fwRes.authorization_url
       }
     }
   })

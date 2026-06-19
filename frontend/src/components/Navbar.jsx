@@ -22,7 +22,7 @@ export default function Navbar() {
   useEffect(() => {
     const handler = setTimeout(async () => {
       if (searchQuery.length >= 2) {
-        try { const res = await searchAPI.search(searchQuery); setSearchResults(res.data) } catch { }
+        try { const res = await searchAPI.search(searchQuery); setSearchResults(res) } catch { }
       } else { setSearchResults([]) }
     }, 300)
     return () => clearTimeout(handler)

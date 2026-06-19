@@ -15,8 +15,8 @@ export function CartProvider({ children }) {
     try {
       setLoading(true)
       const res = await cartAPI.get()
-      setCart(res.data)
-      setItemCount(res.data.items?.reduce((sum, i) => sum + i.quantity, 0) || 0)
+      setCart(res)
+      setItemCount(res.items?.reduce((sum, i) => sum + i.quantity, 0) || 0)
     } catch { } finally { setLoading(false) }
   }, [user])
 
@@ -24,20 +24,20 @@ export function CartProvider({ children }) {
 
   const addToCart = async (productId, variantId, quantity = 1) => {
     const res = await cartAPI.add({ productId, variantId, quantity })
-    setCart(res.data.cart)
-    setItemCount(res.data.cart.items?.reduce((sum, i) => sum + i.quantity, 0) || 0)
+    setCart(res.cart)
+    setItemCount(res.cart.items?.reduce((sum, i) => sum + i.quantity, 0) || 0)
   }
 
   const updateItem = async (itemId, quantity) => {
     const res = await cartAPI.updateItem(itemId, { quantity })
-    setCart(res.data)
-    setItemCount(res.data.items?.reduce((sum, i) => sum + i.quantity, 0) || 0)
+    setCart(res)
+    setItemCount(res.items?.reduce((sum, i) => sum + i.quantity, 0) || 0)
   }
 
   const removeItem = async (itemId) => {
     const res = await cartAPI.removeItem(itemId)
-    setCart(res.data)
-    setItemCount(res.data.items?.reduce((sum, i) => sum + i.quantity, 0) || 0)
+    setCart(res)
+    setItemCount(res.items?.reduce((sum, i) => sum + i.quantity, 0) || 0)
   }
 
   const clearCart = async () => {
