@@ -119,7 +119,7 @@ export default function Dashboard() {
                 </div>
                 <div className="p-6 rounded-2xl bg-pm-light dark:bg-pm-primary/30 border border-pm-border dark:border-white/5">
                   <h2 className="font-semibold mb-4">Recent Orders</h2>
-                  {ordersLoading ? <Loader /> : orders?.slice(0, 5).map(order => (
+                  {ordersLoading ? <Loader /> : Array.isArray(orders) && orders.slice(0, 5).map(order => (
                     <Link key={order.id} to={`/dashboard/orders#${order.id}`} className="flex items-center justify-between py-3 border-b border-pm-border dark:border-white/5 last:border-0 text-sm">
                       <div>
                         <p className="font-medium">{order.orderNumber}</p>

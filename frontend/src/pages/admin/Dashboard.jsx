@@ -71,7 +71,7 @@ export default function AdminDashboard() {
           <div className="p-6 rounded-2xl bg-pm-light dark:bg-pm-primary/30 border border-pm-border dark:border-white/5">
             <h2 className="font-semibold text-lg mb-4">Revenue (Last 30 Days)</h2>
             <div className="flex items-end gap-2 h-40">
-              {data?.revenueData?.slice(-14).map((d, i) => {
+              {Array.isArray(data?.revenueData) && data.revenueData.slice(-14).map((d, i) => {
                 const max = Math.max(...(data?.revenueData?.map(r => r._sum?.total || 0) || [0]), 1)
                 const height = ((d._sum?.total || 0) / max) * 100
                 return (

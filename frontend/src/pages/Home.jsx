@@ -68,7 +68,7 @@ export default function Home() {
         </div>
       </section>
 
-      {featured && featured.length > 0 && (
+      {Array.isArray(featured) && featured.length > 0 && (
         <section className="py-20 bg-white dark:bg-pm-dark">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="flex items-end justify-between mb-12">
@@ -97,7 +97,7 @@ export default function Home() {
               <h2 className="text-3xl sm:text-4xl font-bold font-heading mt-2">Best Sellers</h2>
             </div>
           </motion.div>
-          {bestSellersLoading ? <Loader className="py-20" /> : bestSellers?.length > 0 ? (
+          {bestSellersLoading ? <Loader className="py-20" /> : Array.isArray(bestSellers) && bestSellers.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
               {bestSellers.slice(0, 10).map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
             </div>

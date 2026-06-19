@@ -14,7 +14,12 @@ API.interceptors.request.use((config) => {
 })
 
 API.interceptors.response.use(
-  (response) => response.data,
+  (response) => {
+    if (response.headers['content-type']?.includes('text/html')) {
+      return Promise.reject(new Error('API unavailable'))
+    }
+    return response.data
+  },
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('pm_token')

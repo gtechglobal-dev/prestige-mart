@@ -33,7 +33,7 @@ export default function AdminAnalytics() {
         <div className="p-6 rounded-2xl bg-pm-light dark:bg-pm-primary/30 border border-pm-border dark:border-white/5">
           <h2 className="font-semibold mb-4">Top Selling Products</h2>
           <div className="space-y-3">
-            {data?.topProducts?.slice(0, 8).map((p, i) => (
+            {Array.isArray(data?.topProducts) && data.topProducts.slice(0, 8).map((p, i) => (
               <div key={p.id} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-3 min-w-0">
                   <span className="text-pm-gray font-medium w-6">{i + 1}.</span>
