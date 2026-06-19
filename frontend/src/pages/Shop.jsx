@@ -24,7 +24,7 @@ export default function Shop() {
   const { data, isLoading } = useQuery({
     queryKey: ['products', params],
     queryFn: () => productAPI.getAll(params),
-    keepPreviousData: true,
+    placeholderData: (prev) => prev,
   })
 
   const { data: categories } = useQuery({
