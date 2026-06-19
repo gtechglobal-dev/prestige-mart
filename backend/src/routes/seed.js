@@ -1,9 +1,7 @@
-require('dotenv').config()
-
-const { PrismaClient } = require('@prisma/client')
+const express = require('express')
+const router = express.Router()
 const bcrypt = require('bcryptjs')
-
-const prisma = new PrismaClient()
+const prisma = require('../utils/prisma')
 
 const categories = [
   { name: 'Fashion', slug: 'fashion', description: 'Premium African and international fashion wear', image: 'https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?w=600' },
@@ -76,16 +74,15 @@ const products = [
   { name: 'Silver Chain Bracelet', slug: 'silver-chain-bracelet', description: 'Italian sterling silver chain bracelet with lobster clasp. Classic and timeless design.', price: 125000, comparePrice: 160000, sku: 'JEWL-005', stock: 20, images: ['https://images.unsplash.com/photo-1611591437281-460bfbe29b0e?w=600'], brand: 'Silver Luxe', tags: ['bracelet', 'silver', 'italian', 'classic'], categoryName: 'Jewelry', isFeatured: false, costPrice: 65000, saleCount: 89 },
 ]
 
-module.exports = async (req, res) => {
+router.get('/', async (req, res) => {
   if (req.query.key !== process.env.SEED_KEY) {
     return res.status(401).json({ message: 'Invalid seed key' })
   }
 
   try {
     const adminPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'Admin@123456', 12)
-    const customerPassword = await bcrypt.hash('Customer@123', 12)
 
-    const admin = await prisma.user.upsert({
+    await prisma.user.upsert({
       where: { email: process.env.ADMIN_EMAIL || 'admin@prestigemart.ng' },
       update: {},
       create: { email: process.env.ADMIN_EMAIL || 'admin@prestigemart.ng', password: adminPassword, firstName: 'Admin', lastName: 'Prestige', role: 'ADMIN', phone: '+2348000000000', isVerified: true }
@@ -116,18 +113,16 @@ module.exports = async (req, res) => {
       await prisma.coupon.upsert({ where: { code: coupon.code }, update: {}, create: coupon })
     }
 
-    await prisma.$disconnect()
-
     res.json({
       message: 'Database seeded successfully',
-      admin: { email: admin.email, password: process.env.ADMIN_PASSWORD || 'Admin@123456' },
-      customerPassword: 'Customer@123',
+      admin: { email: process.env.ADMIN_EMAIL || 'admin@prestigemart.ng', password: process.env.ADMIN_PASSWORD || 'Admin@123456' },
       productsCreated: productCount,
       categoriesCreated: categories.length,
       couponsCreated: coupons.length,
     })
   } catch (error) {
-    await prisma.$disconnect()
     res.status(500).json({ message: error.message })
   }
-}
+})
+
+module.exports = router
