@@ -65,7 +65,7 @@ app.use((err, req, res, next) => {
   })
 })
 
-if (!process.env.VERCEL) {
+if (!process.env.VERCEL && !process.env.NETLIFY) {
   const PORT = process.env.PORT || 5000
   app.listen(PORT, () => {
     console.log(`Prestige Mart API running on port ${PORT}`)
