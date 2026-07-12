@@ -23,9 +23,9 @@ const testimonials = [
 ]
 
 export default function Home() {
-  const { data: featured, isLoading: featuredLoading } = useQuery({ queryKey: ['featured-products'], queryFn: productAPI.getFeatured })
-  const { data: bestSellers, isLoading: bestSellersLoading } = useQuery({ queryKey: ['best-sellers'], queryFn: productAPI.getBestSellers })
-  const { data: categories } = useQuery({ queryKey: ['categories'], queryFn: categoryAPI.getAll })
+  const { data: featured, isLoading: featuredLoading, error: featuredError } = useQuery({ queryKey: ['featured-products'], queryFn: productAPI.getFeatured })
+  const { data: bestSellers, isLoading: bestSellersLoading, error: bestSellersError } = useQuery({ queryKey: ['best-sellers'], queryFn: productAPI.getBestSellers })
+  const { data: categories, error: categoriesError } = useQuery({ queryKey: ['categories'], queryFn: categoryAPI.getAll })
 
   const categoryIcons = ['👔', '👟', '⌚', '📱', '💄', '👜', '🎒', '👗', '🏠', '💍']
 
@@ -55,7 +55,12 @@ export default function Home() {
             <h2 className="text-3xl sm:text-4xl font-bold font-heading mt-2">Shop by Category</h2>
           </motion.div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {categories?.map((cat, i) => (
+            {categoriesError ? (
+              <div className="col-span-full text-center py-10">
+                <p className="text-pm-gray mb-2">Failed to load categories.</p>
+                <button onClick={() => window.location.reload()} className="text-pm-secondary text-sm font-medium hover:underline">Retry</button>
+              </div>
+            ) : categories?.map((cat, i) => (
               <motion.div key={cat.id} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}>
                 <Link to={`/shop?category=${cat.slug}`} className="block p-6 rounded-2xl bg-white dark:bg-pm-primary/30 border border-pm-border dark:border-white/5 card-hover text-center group">
                   <span className="text-4xl block mb-3">{categoryIcons[i % categoryIcons.length]}</span>
@@ -68,7 +73,7 @@ export default function Home() {
         </div>
       </section>
 
-      {Array.isArray(featured) && featured.length > 0 && (
+      {featuredLoading || featuredError || (Array.isArray(featured) && featured.length > 0) ? (
         <section className="py-20 bg-white dark:bg-pm-dark">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="flex items-end justify-between mb-12">
@@ -80,14 +85,19 @@ export default function Home() {
                 View All <span>→</span>
               </Link>
             </motion.div>
-            {featuredLoading ? <Loader className="py-20" /> : (
+            {featuredLoading ? <Loader className="py-20" /> : featuredError ? (
+              <div className="text-center py-10">
+                <p className="text-pm-gray mb-2">Failed to load featured products.</p>
+                <button onClick={() => window.location.reload()} className="text-pm-secondary text-sm font-medium hover:underline">Retry</button>
+              </div>
+            ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                 {featured.slice(0, 10).map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
               </div>
             )}
           </div>
         </section>
-      )}
+      ) : null}
 
       <section className="py-20 bg-pm-light dark:bg-pm-primary/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -97,7 +107,12 @@ export default function Home() {
               <h2 className="text-3xl sm:text-4xl font-bold font-heading mt-2">Best Sellers</h2>
             </div>
           </motion.div>
-          {bestSellersLoading ? <Loader className="py-20" /> : Array.isArray(bestSellers) && bestSellers.length > 0 ? (
+          {bestSellersLoading ? <Loader className="py-20" /> : bestSellersError ? (
+            <div className="text-center py-10">
+              <p className="text-pm-gray mb-2">Failed to load best sellers.</p>
+              <button onClick={() => window.location.reload()} className="text-pm-secondary text-sm font-medium hover:underline">Retry</button>
+            </div>
+          ) : Array.isArray(bestSellers) && bestSellers.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
               {bestSellers.slice(0, 10).map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
             </div>

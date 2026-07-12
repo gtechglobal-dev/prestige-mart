@@ -1,21 +1,31 @@
-const prisma = require('../utils/prisma')
+const Wishlist = require('../models/Wishlist')
+const Review = require('../models/Review')
 
 exports.getWishlist = async (req, res, next) => {
   try {
-    const items = await prisma.wishlist.findMany({
-      where: { userId: req.user.id },
-      include: {
-        product: {
-          include: {
-            category: { select: { id: true, name: true, slug: true } },
-            reviews: { select: { rating: true } },
-            _count: { select: { reviews: true } }
-          }
-        }
-      },
-      orderBy: { createdAt: 'desc' }
-    })
-    res.json(items.map(w => ({ ...w.product, wishlistedAt: w.createdAt, avgRating: w.product.reviews.length > 0 ? Math.round(w.product.reviews.reduce((s, r) => s + r.rating, 0) / w.product.reviews.length * 10) / 10 : 0 })))
+    const items = await Wishlist.find({ userId: req.user.id })
+      .populate({
+        path: 'productId',
+        populate: { path: 'categoryId', select: 'name slug' }
+      })
+      .sort({ createdAt: -1 })
+
+    const productIds = items.filter(i => i.productId).map(i => i.productId._id)
+    const reviews = await Review.aggregate([
+      { $match: { productId: { $in: productIds } } },
+      { $group: { _id: '$productId', avgRating: { $avg: '$rating' }, count: { $sum: 1 } } }
+    ])
+    const reviewMap = {}
+    reviews.forEach(r => { reviewMap[r._id.toString()] = { avgRating: Math.round(r.avgRating * 10) / 10, reviewCount: r.count } })
+
+    res.json(items.filter(i => i.productId).map(w => ({
+      ...w.productId.toObject(),
+      id: w.productId._id,
+      category: w.productId.categoryId,
+      wishlistedAt: w.createdAt,
+      avgRating: reviewMap[w.productId._id.toString()]?.avgRating || 0,
+      reviewCount: reviewMap[w.productId._id.toString()]?.reviewCount || 0,
+    })))
   } catch (error) {
     next(error)
   }
@@ -24,10 +34,10 @@ exports.getWishlist = async (req, res, next) => {
 exports.addToWishlist = async (req, res, next) => {
   try {
     const { productId } = req.body
-    const existing = await prisma.wishlist.findUnique({ where: { userId_productId: { userId: req.user.id, productId } } })
+    const existing = await Wishlist.findOne({ userId: req.user.id, productId })
     if (existing) return res.status(400).json({ message: 'Already in wishlist' })
 
-    await prisma.wishlist.create({ data: { userId: req.user.id, productId } })
+    await Wishlist.create({ userId: req.user.id, productId })
     res.status(201).json({ message: 'Added to wishlist' })
   } catch (error) {
     next(error)
@@ -36,7 +46,7 @@ exports.addToWishlist = async (req, res, next) => {
 
 exports.removeFromWishlist = async (req, res, next) => {
   try {
-    await prisma.wishlist.delete({ where: { userId_productId: { userId: req.user.id, productId: req.params.productId } } })
+    await Wishlist.findOneAndDelete({ userId: req.user.id, productId: req.params.productId })
     res.json({ message: 'Removed from wishlist' })
   } catch (error) {
     next(error)

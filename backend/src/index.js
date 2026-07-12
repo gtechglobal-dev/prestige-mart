@@ -5,6 +5,7 @@ const helmet = require('helmet')
 const morgan = require('morgan')
 const cookieParser = require('cookie-parser')
 const rateLimit = require('express-rate-limit')
+const connectDB = require('./utils/db')
 
 const authRoutes = require('./routes/auth')
 const productRoutes = require('./routes/products')
@@ -22,6 +23,8 @@ const searchRoutes = require('./routes/search')
 const seedRoutes = require('./routes/seed')
 
 const app = express()
+
+const dbReady = connectDB()
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,

@@ -17,7 +17,9 @@ export function CartProvider({ children }) {
       const res = await cartAPI.get()
       setCart(res)
       setItemCount(res.items?.reduce((sum, i) => sum + i.quantity, 0) || 0)
-    } catch { } finally { setLoading(false) }
+    } catch (err) {
+      console.error('Failed to fetch cart:', err)
+    } finally { setLoading(false) }
   }, [user])
 
   useEffect(() => { fetchCart() }, [fetchCart])

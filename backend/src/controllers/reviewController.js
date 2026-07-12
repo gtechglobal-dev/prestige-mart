@@ -1,21 +1,20 @@
-const prisma = require('../utils/prisma')
+const Review = require('../models/Review')
+const Product = require('../models/Product')
 
 exports.createReview = async (req, res, next) => {
   try {
     const { productId, rating, title, comment } = req.body
 
-    const product = await prisma.product.findUnique({ where: { id: productId } })
+    const product = await Product.findById(productId)
     if (!product) return res.status(404).json({ message: 'Product not found' })
 
-    const existing = await prisma.review.findUnique({ where: { productId_userId: { productId, userId: req.user.id } } })
+    const existing = await Review.findOne({ productId, userId: req.user.id })
     if (existing) return res.status(400).json({ message: 'You already reviewed this product' })
 
-    const review = await prisma.review.create({
-      data: { productId, userId: req.user.id, rating, title, comment },
-      include: { user: { select: { id: true, firstName: true, lastName: true, avatar: true } } }
-    })
+    const review = await Review.create({ productId, userId: req.user.id, rating, title, comment })
+    const populated = await Review.findById(review._id).populate('userId', 'firstName lastName avatar')
 
-    res.status(201).json({ message: 'Review submitted', review })
+    res.status(201).json({ message: 'Review submitted', review: populated })
   } catch (error) {
     next(error)
   }
@@ -23,11 +22,9 @@ exports.createReview = async (req, res, next) => {
 
 exports.getProductReviews = async (req, res, next) => {
   try {
-    const reviews = await prisma.review.findMany({
-      where: { productId: req.params.productId },
-      include: { user: { select: { id: true, firstName: true, lastName: true, avatar: true } } },
-      orderBy: { createdAt: 'desc' }
-    })
+    const reviews = await Review.find({ productId: req.params.productId })
+      .populate('userId', 'firstName lastName avatar')
+      .sort({ createdAt: -1 })
     res.json(reviews)
   } catch (error) {
     next(error)

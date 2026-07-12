@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const prisma = require('../utils/prisma')
+const User = require('../models/User')
 
 const authenticate = async (req, res, next) => {
   try {
@@ -11,16 +11,13 @@ const authenticate = async (req, res, next) => {
     const token = authHeader.split(' ')[1]
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
 
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: { id: true, email: true, firstName: true, lastName: true, role: true, avatar: true, phone: true }
-    })
+    const user = await User.findById(decoded.id).select('email firstName lastName role avatar phone')
 
     if (!user) {
       return res.status(401).json({ message: 'Invalid token. User not found.' })
     }
 
-    req.user = user
+    req.user = { id: user._id.toString(), email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role, avatar: user.avatar, phone: user.phone }
     next()
   } catch (error) {
     if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
@@ -40,12 +37,9 @@ const optionalAuth = async (req, res, next) => {
     const token = authHeader.split(' ')[1]
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
 
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: { id: true, email: true, firstName: true, lastName: true, role: true }
-    })
+    const user = await User.findById(decoded.id).select('email firstName lastName role')
 
-    if (user) req.user = user
+    if (user) req.user = { id: user._id.toString(), email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role }
     next()
   } catch {
     next()

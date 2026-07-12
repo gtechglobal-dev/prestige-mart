@@ -19,7 +19,7 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1)
   const [reviewForm, setReviewForm] = useState({ rating: 5, title: '', comment: '' })
 
-  const { data: product, isLoading } = useQuery({
+  const { data: product, isLoading, error } = useQuery({
     queryKey: ['product', slug],
     queryFn: () => productAPI.getBySlug(slug),
   })
@@ -47,6 +47,7 @@ export default function ProductDetail() {
   }
 
   if (isLoading) return <Loader className="min-h-[60vh]" />
+  if (error) return <div className="text-center py-20"><p className="text-pm-gray mb-2">Failed to load product.</p><button onClick={() => window.location.reload()} className="text-pm-secondary text-sm font-medium hover:underline">Retry</button></div>
   if (!product) return <div className="text-center py-20">Product not found</div>
 
   const stars = getStars(product.avgRating || 0)

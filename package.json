@@ -4,12 +4,9 @@
   "scripts": {
     "dev": "cd backend && npm run dev",
     "build": "cd frontend && npm ci && npm run build",
-    "seed": "node backend/prisma/seed.js",
-    "prisma:push": "cd backend && npx prisma db push",
-    "postinstall": "npx prisma generate --schema=backend/prisma/schema.prisma"
+    "seed": "node backend/prisma/seed.js"
   },
   "dependencies": {
-    "@prisma/client": "^5.22.0",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -18,9 +15,9 @@
     "express-rate-limit": "^7.4.0",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.16.0",
     "morgan": "^1.10.0",
     "nodemailer": "^6.9.15",
-    "prisma": "^5.22.0",
     "serverless-http": "^3.2.0"
   }
 }

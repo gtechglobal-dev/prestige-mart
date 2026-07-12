@@ -21,7 +21,7 @@ export default function Shop() {
     page: searchParams.get('page') || '1',
   }
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['products', params],
     queryFn: () => productAPI.getAll(params),
     placeholderData: (prev) => prev,
@@ -104,7 +104,12 @@ export default function Shop() {
               </div>
             </div>
 
-            {isLoading ? <Loader className="py-20" /> : (
+            {isLoading ? <Loader className="py-20" /> : error ? (
+              <div className="text-center py-20">
+                <p className="text-pm-gray mb-2">Failed to load products. Please try again.</p>
+                <button onClick={() => window.location.reload()} className="text-pm-secondary text-sm font-medium hover:underline">Retry</button>
+              </div>
+            ) : (
               <>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {data?.products?.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}

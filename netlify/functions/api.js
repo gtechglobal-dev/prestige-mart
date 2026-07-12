@@ -1,10 +1,20 @@
 const serverless = require('serverless-http')
 const app = require('../../backend/src/index')
+const connectDB = require('../../backend/src/utils/db')
 
-const handler = serverless(app, {
-  request: (request, event) => {
-    request.url = event.path.replace('/.netlify/functions/api', '/api') || '/api'
+let handler
+
+exports.handler = async (event, context) => {
+  await connectDB()
+
+  if (!handler) {
+    handler = serverless(app, {
+      request: (request) => {
+        const path = event.path.replace('/.netlify/functions/api', '') || '/'
+        request.url = '/api' + path
+      }
+    })
   }
-})
 
-exports.handler = handler
+  return handler(event, context)
+}
