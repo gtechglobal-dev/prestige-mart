@@ -59,7 +59,7 @@ app.use('/api/notifications', notificationRoutes)
 app.use('/api/search', searchRoutes)
 app.use('/api/seed', seedRoutes)
 
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === 'production' || process.env.RENDER) {
   const frontendBuild = path.join(__dirname, '..', '..', 'frontend', 'dist')
   app.use(express.static(frontendBuild))
   app.get('*', (req, res) => {
