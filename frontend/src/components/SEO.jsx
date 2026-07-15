@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 export default function SEO({ title, description, image, url }) {
   const siteName = 'Prestige Mart'
   const defaultDesc = 'Nigeria\'s premier luxury fashion and lifestyle destination. Shop premium clothing, shoes, watches, bags, perfumes, electronics and accessories.'
-  const defaultImage = '/og-image.jpg'
+  const defaultImage = '/icons.svg'
 
   useEffect(() => {
     const fullTitle = title ? `${title} | ${siteName}` : `${siteName} - Premium Luxury Fashion & Lifestyle Store`
