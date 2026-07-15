@@ -25,8 +25,6 @@ const seedRoutes = require('./routes/seed')
 
 const app = express()
 
-const dbReady = connectDB()
-
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -79,9 +77,16 @@ app.use((err, req, res, next) => {
 
 if (!process.env.VERCEL && !process.env.NETLIFY) {
   const PORT = process.env.PORT || 5000
-  app.listen(PORT, () => {
-    console.log(`Prestige Mart API running on port ${PORT}`)
-  })
+  connectDB()
+    .then(() => {
+      app.listen(PORT, () => {
+        console.log(`Prestige Mart API running on port ${PORT}`)
+      })
+    })
+    .catch((err) => {
+      console.error('Failed to start server:', err.message)
+      process.exit(1)
+    })
 }
 
 module.exports = app
