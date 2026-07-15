@@ -43,3 +43,17 @@ services:
         value: admin@prestigemart.ng
       - key: ADMIN_PASSWORD
         sync: false
+
+  - type: cron
+    name: prestige-mart-keep-alive
+    runtime: node
+    plan: starter
+    schedule: "*/10 * * * *"
+    buildCommand: npm install
+    envVars:
+      - key: SERVICE_URL
+        fromService:
+          name: prestige-mart
+          type: web
+          property: url
+    startCommand: node -e "fetch(process.env.SERVICE_URL + '/api/health').then(r => console.log('Ping:', r.status)).catch(e => console.error('Error:', e.message))"
