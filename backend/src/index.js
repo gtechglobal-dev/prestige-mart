@@ -1,5 +1,6 @@
 require('dotenv').config()
 const express = require('express')
+const path = require('path')
 const cors = require('cors')
 const helmet = require('helmet')
 const morgan = require('morgan')
@@ -59,6 +60,14 @@ app.use('/api/payments', paymentRoutes)
 app.use('/api/notifications', notificationRoutes)
 app.use('/api/search', searchRoutes)
 app.use('/api/seed', seedRoutes)
+
+if (process.env.NODE_ENV === 'production') {
+  const frontendBuild = path.join(__dirname, '..', '..', 'frontend', 'dist')
+  app.use(express.static(frontendBuild))
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendBuild, 'index.html'))
+  })
+}
 
 app.use((err, req, res, next) => {
   console.error('Error:', err)
