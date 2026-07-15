@@ -3,7 +3,7 @@ services:
     name: prestige-mart
     runtime: node
     plan: starter
-    buildCommand: cd backend && npm ci && cd ../frontend && npm ci && npm run build
+    buildCommand: cd backend && npm install && cd ../frontend && npm install && npm run build
     startCommand: cd backend && node src/index.js
     healthCheckPath: /api/health
     envVars:
